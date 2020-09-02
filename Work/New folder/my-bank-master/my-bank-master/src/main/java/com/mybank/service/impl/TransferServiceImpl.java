@@ -37,27 +37,22 @@ public class TransferServiceImpl implements TransferService {
 		Account toAcct = checkAccountDetails(transaction.getToAccountNumber());
 		// check if there are sufficient funds.
 		BigDecimal fromBalance = fromAcct.getBalance();
-		if (fromBalance.compareTo(zero)==1) {
-			if (transaction.getAmount().compareTo(fromBalance) ==1) {
-				// throw no sufficient funds
-				throw new ResourceNotFoundException("Account doesnot have sufficient funds to transfer ::", "",
-						transaction.getFromAccountNumber());
-			}
+		if (fromBalance.compareTo(zero) == 1 && fromBalance.compareTo(transaction.getAmount()) >= 0) {
 
+			// logic to make transfer
+			fromAcct.setBalance(fromBalance.subtract(transaction.getAmount()));
+			toAcct.setBalance(toAcct.getBalance().add(transaction.getAmount()));
+
+			accountDAO.updateBalance(transaction.getFromAccountNumber(), fromAcct.getBalance());
+			accountDAO.updateBalance(transaction.getToAccountNumber(), toAcct.getBalance());
+
+			return fromAcct.getBalance();
 		} else {
 			// throw no balance available
 			throw new ResourceNotFoundException("Account doesnot have sufficient funds to transfer ::", "",
 					transaction.getFromAccountNumber());
 		}
 
-		// logic to make transfer
-		fromAcct.setBalance(fromBalance.subtract(transaction.getAmount()));
-		toAcct.setBalance(toAcct.getBalance().add(transaction.getAmount()));
-
-		accountDAO.updateBalance(transaction.getFromAccountNumber(), fromAcct.getBalance());
-		accountDAO.updateBalance(transaction.getToAccountNumber(), toAcct.getBalance());
-
-		return fromAcct.getBalance();
 	}
 
 	private Account checkAccountDetails(Integer accountNumber) throws Exception {
