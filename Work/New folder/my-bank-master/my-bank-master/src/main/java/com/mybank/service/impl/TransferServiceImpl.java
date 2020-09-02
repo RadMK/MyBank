@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.mybank.exception.ResourceNotFoundException;
 import com.mybank.model.Account;
+import com.mybank.model.Transaction;
 import com.mybank.repository.AccountDAO;
 import com.mybank.service.AccountService;
 import com.mybank.service.TransferService;
@@ -25,34 +26,34 @@ public class TransferServiceImpl implements TransferService {
 	private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
 
 	@Override
-	public BigDecimal makeTransfer(Integer fromAccountNumber, Integer toAccountNumber, BigDecimal amount) throws Exception {
+	public BigDecimal makeTransfer(Transaction transaction) throws Exception {
 
 		BigDecimal zero = new BigDecimal(0);
 		// check if from account exits
-		Account fromAcct = checkAccountDetails(fromAccountNumber);
+		Account fromAcct = checkAccountDetails(transaction.getFromAccountNumber());
 		// check if to account exits
-		Account toAcct = checkAccountDetails(toAccountNumber);
+		Account toAcct = checkAccountDetails(transaction.getToAccountNumber());
 		// check if there are sufficient funds.
 		BigDecimal fromBalance = fromAcct.getBalance();
 		if (fromBalance.compareTo(zero)==1) {
-			if (amount.compareTo(fromBalance) ==1) {
+			if (transaction.getAmount().compareTo(fromBalance) ==1) {
 				// throw no sufficient funds
 				throw new ResourceNotFoundException("Account doesnot have sufficient funds to transfer ::", "",
-						fromAccountNumber);
+						transaction.getFromAccountNumber());
 			}
 
 		} else {
 			// throw no balance available
 			throw new ResourceNotFoundException("Account doesnot have sufficient funds to transfer ::", "",
-					fromAccountNumber);
+					transaction.getFromAccountNumber());
 		}
 
 		// logic to make transfer
-		fromAcct.setBalance(fromBalance.subtract(amount));
-		toAcct.setBalance(toAcct.getBalance().add(amount));
+		fromAcct.setBalance(fromBalance.subtract(transaction.getAmount()));
+		toAcct.setBalance(toAcct.getBalance().add(transaction.getAmount()));
 
-		accountDAO.updateBalance(fromAccountNumber, fromAcct.getBalance());
-		accountDAO.updateBalance(toAccountNumber, toAcct.getBalance());
+		accountDAO.updateBalance(transaction.getFromAccountNumber(), fromAcct.getBalance());
+		accountDAO.updateBalance(transaction.getToAccountNumber(), toAcct.getBalance());
 
 		return fromAcct.getBalance();
 	}

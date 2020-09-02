@@ -23,8 +23,7 @@ public class AccountController {
 		BigDecimal updatedBalance = null;
 		try {
 
-			updatedBalance = transferService.makeTransfer(transaction.getFromAccountNumber(),
-					transaction.getToAccountNumber(), transaction.getAmount());
+			updatedBalance = transferService.makeTransfer(transaction);
 
 		} catch (Exception e) {
 			return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);

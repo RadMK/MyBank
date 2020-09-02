@@ -2,8 +2,10 @@ package com.mybank.service;
 
 import java.math.BigDecimal;
 
+import com.mybank.model.Transaction;
+
 public interface TransferService {
 	
-	BigDecimal makeTransfer(Integer fromAccountNumber, Integer toAccountNumber, BigDecimal amount) throws Exception; 
+	BigDecimal makeTransfer(Transaction transaction) throws Exception; 
 
 }
